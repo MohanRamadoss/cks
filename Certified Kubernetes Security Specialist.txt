@@ -1,0 +1,79 @@
+Earlier this year CNCF announced that there will be changes for the Certified Kubernetes Administrator (CKA), we roughly compared the old and new curriculum and saw that some of the Security topics will be dropped with the new CKA exam. This led us to the consumption that the CNCF will bring a Security specialized certification. And here it is!
+
+Certified Kubernetes Security Specialist (CKS)
+In the announcement of the CNCF the CKS is described as
+
+... testing competence across best practices for securing container-based applications and Kubernetes platforms during build, deployment, and runtime. The new certification is designed to enable cloud native professionals to demonstrate security skills to current and potential employers.
+From the current timeline, they assume it will be general available before KubeCon/CloudNativeCon NA in November. On the training and certification page of the Linux Foundation is written that the CKS will run on K8s 1.19. The v1.19 release is planned for the 25th of August. Therefore we expect to have the first exams in Mid October.
+
+CKS required competencies and domains
+Before we come to the summary of potentially relevant learning resources for CKS lets, have a look at the yet given outline (this can still change) and weight per domain.
+
+Cluster Setup – 10%‌‌Best practice configuration to control the environment's access, rights and platform conformity.
+Cluster Hardening – 15%‌‌Protecting K8s API and utilize RBAC.
+System Hardening – 15%‌‌Improve the security of OS & Network; restrict access through IAM.
+Minimize Microservice Vulnerabilities – 20%‌‌Utlizing on K8s various mechanisms to isolate, protect and control workload.
+Supply Chain Security – 20%‌‌Container oriented security, trusted resources, optimized container images, CVE scanning.
+Monitoring, Logging and Runtime Security – 20%‌‌Analyse and detect threads.
+From our experience, this looks pretty good and covers the directly K8s impacting domains, and covers pretty much the whole stack from installation & OS to K8s configuration, container itself and Day2 relevant analytics. Also, I'm a little bit concerned about how this should fit into a 2h exam.
+
+CKS Exam Preparation
+One of the precondition to take the CKS is to have a valid CKA. If this is some while ago, start with the CKA prep to refresh your knowledge. A first good starting point for securing Kubernetes is the Task section of the official K8s documentation.
+
+Cluster Setup
+
+Use Network security policies to restrict cluster level access
+Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi)‌‌
+NCD: getting an overview about Kubernetes CIS requirements is key here. The benchmark is not yet available for `1.19`, but earlier version already give q great understanding of the deal. CIS benchmarks are usually automized with tools like VMWares Sonobuoy which can perform kubebench tests.
+Properly set up Ingress objects with security control
+Protect node metadata and endpoints
+NCD: Retrieving metadata from your cloud providers instance is a common practice. Restricting access to Amazon EC2 instance profile credentials or its UserData could be part of the exam.
+Minimize use of, and access to, GUI elements
+NCD: we recommend reading ever greens like Joe Bedas article On Securing the Kubernetes Dashbioard which is a great overview on how to secure guis.
+Verify platform binaries before deploying
+Cluster Hardening
+
+Restrict access to Kubernetes API
+Use Role Based Access Controls to minimize exposure
+NCD: the CKA study guide from David is also a great start point!
+Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones‌‌
+NCD: There are a couple of things which can be done, most reasonable: Manage Service Accounts & Connfigure Service Accounts
+Update Kubernetes frequently‌‌
+NCD: using kubeadm looks most reasonable for us
+System Hardening
+
+Minimize host OS footprint (reduce attack surface)
+NCD: there is a CIS benchmark dedicated to literally - quite - a lot - of - linux - distributions. Start with the distribution independent benchmark to get an overview!
+Minimize IAM roles
+NCD: granting least privilege is generally the way to go!
+Minimize external access to the network
+NCD: hosts should be secured utilizing security groups or OS-level firewalls like ufw
+Appropriately use kernel hardening tools such as AppArmor, seccomp
+NCD: we highly recommend the book "Container Security" by Liz Rice which covers AppArmor, Seccomp, SELinux and the whole gang...
+Minimize Microservice Vulnerabilities
+
+Setup appropriate OS level security domains e.g. using PSP, OPA, security contexts
+Manage Kubernetes secrets‌‌
+NCD: K8s secrets are not the best place to store sensitive information, there is a whole episode of TGIK covering advanced Kubernetes secret management discussing tools like sealed secrets or the secrets-store-csi-driver for example.
+Use container runtime sandboxes in multi-tenant environments (e.g. gvisor, kata containers)
+Implement pod to pod encryption by use of mTLS‌‌
+NCD: we can't imagine doing this manually, more likely we assume about options as linkerd or istio. However, having an understanding of TLS certificates within a cluster and the concepts how e.g. Istio is realizing mTLS is probably a good idea. Here is one with pictures.
+Supply Chain Security
+
+Minimize base image footprint‌‌
+NCD: Good starting point for this is the 7 best practices for build containers. In general, we prefer to start by small container images like alpine and only add what is needed.
+Secure your supply chain: whitelist allowed registries, sign and validate images‌‌
+NCD: Open Policy Agent has an exampole how to restrict pulling images from registries. Also docker describes an easy way to do so. In any case it might make sense to familarize with Kubernetes Admission Control in to get the concepts.
+Use static analysis of user workloads (e.g.Kubernetes resources, Docker files)‌‌
+NCD: potentially something like kubehunter.
+Scan images for known vulnerabilities‌‌
+NCD: scanning images by hand could be fun, but more likely, you will have the possibility to use clair.
+Monitoring, Logging and Runtime Security
+
+Perform behavioral analytics of syscall process and file activities at the host and container level to detect malicious activities‌‌
+Detect threats within physical infrastructure, apps, networks, data, users and workloads
+Detect all phases of attack regardless where it occurs and how it spreads
+Perform deep analytical investigation and identification of bad actors within environment
+Ensure immutability of containers at runtime
+NCD: potentially something like falco could help.
+Use Audit Logs to monitor access
